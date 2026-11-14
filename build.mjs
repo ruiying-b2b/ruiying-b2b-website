@@ -126,20 +126,80 @@ for (const p of products) {
 }
 log(`✓ 图片检查完成，缺失 ${missing} 个`);
 
-// ---------- 7. canonical + sitemap ----------
+// ---------- 7. 每个路由生成独立 HTML（canonical / title / description 各不相同） ----------
+// 单页应用默认所有路径返回同一份 index.html，导致每个页面都自称「首页的副本」，
+// 搜索引擎会把 /products、/about、/contact 判为重复页面而拒绝收录。
+// 这里给每个路由落一份独立 HTML，只改 head，不动页面渲染逻辑。
 const routes = ['/', '/products', '/about', '/contact'];
+
+const PAGES = {
+  '/': {
+    title: 'Ruiying — Commercial Equipment OEM / ODM',
+    desc: 'Ruiying develops smart vending machines, commercial entertainment equipment and self-service solutions for global OEM / ODM buyers.',
+  },
+  '/products': {
+    title: 'Products — Vending & Entertainment Equipment | Ruiying',
+    desc: 'Ruiying product lines for OEM / ODM buyers: smart vending machines, popcorn and cotton candy equipment, ice cream machines, claw machines, VR rides and phone case printers.',
+  },
+  '/about': {
+    title: 'About Ruiying — Vending Equipment Supplier & OEM Partner',
+    desc: 'Ruiying is a Guangzhou based supplier of vending and commercial entertainment equipment, supporting global OEM / ODM projects with CE approved hardware.',
+  },
+  '/contact': {
+    title: 'Contact Ruiying — OEM / ODM Inquiry',
+    desc: 'Contact Ruiying for vending machine and entertainment equipment inquiries by email, WhatsApp or phone. OEM / ODM project support for global buyers.',
+  },
+};
+
+function applyMeta(html, { title, desc, url }) {
+  let out = html;
+  if (/<title>[^<]*<\/title>/.test(out)) {
+    out = out.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
+  } else {
+    out = out.replace('</head>', `  <title>${title}</title>\n  </head>`);
+  }
+  if (/<meta name="description"[^>]*>/.test(out)) {
+    out = out.replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${desc}" />`);
+  } else {
+    out = out.replace('</head>', `  <meta name="description" content="${desc}" />\n  </head>`);
+  }
+  if (/<link rel="canonical"[^>]*>/.test(out)) {
+    out = out.replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${url}" />`);
+  } else {
+    out = out.replace('</head>', `  <link rel="canonical" href="${url}" />\n  </head>`);
+  }
+  if (/<meta property="og:url"[^>]*>/.test(out)) {
+    out = out.replace(/<meta property="og:url"[^>]*>/, `<meta property="og:url" content="${url}" />`);
+  } else {
+    out = out.replace('</head>', `  <meta property="og:url" content="${url}" />\n  </head>`);
+  }
+  if (/<meta property="og:title"[^>]*>/.test(out)) {
+    out = out.replace(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${title}" />`);
+  } else {
+    out = out.replace('</head>', `  <meta property="og:title" content="${title}" />\n  </head>`);
+  }
+  return out;
+}
+
 const domain = (site.domain || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
 if (domain) {
-  const idx = path.join(DIST, 'index.html');
-  let html = fs.readFileSync(idx, 'utf8');
-  if (!html.includes('rel="canonical"')) {
-    html = html.replace(
-      '</head>',
-      `  <link rel="canonical" href="https://${domain}/" />\n  <meta property="og:url" content="https://${domain}/" />\n  </head>`
-    );
-    fs.writeFileSync(idx, html, 'utf8');
-    log(`✓ 已写入 canonical：https://${domain}/`);
+  const baseFile = path.join(DIST, 'index.html');
+  const baseHtml = fs.readFileSync(baseFile, 'utf8');
+
+  for (const r of routes) {
+    const meta = PAGES[r];
+    const url = `https://${domain}${r}`;
+    const html = applyMeta(baseHtml, { title: meta.title, desc: meta.desc, url });
+
+    if (r === '/') {
+      fs.writeFileSync(baseFile, html, 'utf8');
+    } else {
+      const dir = path.join(DIST, r.slice(1));
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+    }
   }
+  log(`✓ 已生成 ${routes.length} 个页面（各自独立 canonical / title / description）`);
 
   const urls = routes
     .map((r) => `  <url><loc>https://${domain}${r}</loc><changefreq>monthly</changefreq></url>`)
@@ -151,7 +211,7 @@ if (domain) {
   );
   log('✓ 已生成 sitemap.xml');
 } else {
-  warn.push('content/site.json 未设置 domain，跳过 canonical 与 sitemap');
+  warn.push('content/site.json 未设置 domain，跳过 canonical、分页面 HTML 与 sitemap');
 }
 
 // ---------- 8. 汇总 ----------
