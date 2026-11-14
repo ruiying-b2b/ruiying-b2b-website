@@ -1,0 +1,85 @@
+# Pages CMS 配置（后台在 pagescms.org 登录，直接读写本仓库文件）
+# 文档：https://pagescms.org/docs/configuration/
+
+media:
+  products:
+    input: site/assets/images/products
+    output: /assets/images/products
+
+content:
+  - name: products
+    label: 产品
+    type: file
+    path: content/products.json
+    format: json
+    list: true
+    view:
+      primary: name
+      sort: id
+      order: asc
+    fields:
+      - name: id
+        label: 编号（数字，唯一，新增产品给个没用过的号）
+        type: number
+        required: true
+      - name: name
+        label: 产品名称（英文，客户看到的标题）
+        type: string
+        required: true
+      - name: model
+        label: 型号行（如 SMOKE VENDING / RV-03）
+        type: string
+        required: true
+      - name: category
+        label: 分类（决定产品挂在哪个筛选下）
+        type: select
+        required: true
+        options:
+          values:
+            - Smart Vending
+            - Food & Treat Equipment
+            - Commercial Entertainment
+      - name: image
+        label: 主图
+        type: image
+        required: true
+        options:
+          media: products
+          path: site/assets/images/products
+          extensions: [jpg, jpeg, png, webp]
+      - name: copy
+        label: 卖点描述（英文，2 句以内）
+        type: text
+        required: true
+      - name: specs
+        label: 参数要点（每条一行，建议 2 条，最多 3 条）
+        type: string
+        list: true
+      - name: gallery
+        label: 图集（可多张，选填）
+        type: image
+        options:
+          media: products
+          path: site/assets/images/products
+          extensions: [jpg, jpeg, png, webp]
+          multiple:
+            extensions: [jpg, jpeg, png, webp]
+
+  - name: site
+    label: 联系方式
+    type: file
+    path: content/site.json
+    format: json
+    fields:
+      - name: domain
+        label: 站点域名（不含 https://，用于 canonical 与 sitemap）
+        type: string
+      - name: email
+        label: 询盘邮箱
+        type: string
+      - name: phoneDisplay
+        label: 电话（含国家码，页面上显示的样子）
+        type: string
+      - name: whatsappNumber
+        label: WhatsApp 号码（只填数字，含国家码，如 8619802038683）
+        type: string

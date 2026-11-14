@@ -1,0 +1,218 @@
+[
+  {
+    "id": 1,
+    "name": "Popcorn Vending Machine",
+    "model": "POPCORN VENDING / PR30",
+    "category": "Food & Treat Equipment",
+    "image": "/assets/images/products/popcorn-pr30-main.png",
+    "copy": "Designed for malls, cinemas and amusement venues, with flavor options, QR / coin payment and remote management.",
+    "specs": [
+      "120–180 sec. production time",
+      "220V / 110V · 2000W"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Popcorn Vending Machine",
+    "model": "POPCORN VENDING / PR31",
+    "category": "Food & Treat Equipment",
+    "image": "/assets/images/products/popcorn-pr31-main.png",
+    "copy": "Supports multilingual interfaces and multiple payment options for standardized commercial deployment.",
+    "specs": [
+      "60-cup capacity",
+      "Approx. 150 cups per refill"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Ice Cream Vending Machine",
+    "model": "ICE CREAM VENDING / ICM-R002",
+    "category": "Food & Treat Equipment",
+    "image": "/assets/images/products/icecream-icm-r002-main.jpeg",
+    "copy": "21.5-inch touchscreen with multiple flavors and payment options for hotels, cinemas, restaurants and malls.",
+    "specs": [
+      "Approx. 100-cup capacity",
+      "CE · ISO 9001"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Ice Cream Vending Machine",
+    "model": "ICE CREAM VENDING / ICM-R004",
+    "category": "Food & Treat Equipment",
+    "image": "/assets/images/products/icecream-icm-r004-main.png",
+    "copy": "Refrigerated self-service equipment with multi-country plug options and one-year warranty support.",
+    "specs": [
+      "16L ingredient tank",
+      "220V · 50Hz"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Smart Protein Powder Vending Machine",
+    "model": "PROTEIN POWDER / PTM-112",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/protein-ptm-112-main.png",
+    "copy": "Six ingredient hoppers and a 21-inch ordering screen for gyms, hotels and health-focused venues.",
+    "specs": [
+      "80×65×175cm",
+      "Approx. 2 minutes per cup"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Smart Protein Powder Vending Machine",
+    "model": "PROTEIN POWDER / PTM-300",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/protein-ptm-300-white-v2.png",
+    "copy": "32-inch touchscreen with cloud management, automatic cleaning, inventory monitoring and flexible payment options.",
+    "specs": [
+      "25 sec. per cup",
+      "110–240V · 4G / Wi-Fi"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Smart Coffee Vending Machine",
+    "model": "COFFEE VENDING / CFM-R02",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/coffee-cfm-r02-white-v2.png",
+    "copy": "A self-service coffee solution for offices, malls, hotels, transport hubs and other commercial spaces.",
+    "specs": [
+      "Project customization available",
+      "Local payment and plug matching"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Cotton Candy Vending Machine",
+    "model": "COTTON CANDY / CM-R306",
+    "category": "Food & Treat Equipment",
+    "image": "/assets/images/products/cotton-candy-cm-r306-main.png",
+    "copy": "Fast cotton candy production with flavor and pattern choices, automatic cleaning and remote management.",
+    "specs": [
+      "Multilingual support",
+      "For malls and family entertainment spaces"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Cotton Candy Vending Machine",
+    "model": "COTTON CANDY / CM-R304",
+    "category": "Food & Treat Equipment",
+    "image": "/assets/images/products/cotton-candy-cm-r304-main.png",
+    "copy": "Compact commercial equipment with configurable appearance, colors and operating setup.",
+    "specs": [
+      "OEM / ODM customization",
+      "QR and coin payment options"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Smart Flower Vending Machine",
+    "model": "FLOWER VENDING / RF-01",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/flower-vending-main.png",
+    "copy": "Adjustable compartments and temperature control for malls, transport hubs and tourist attractions.",
+    "specs": [
+      "Temperature-controlled freshness",
+      "Display lighting and remote control"
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Perfume Vending Machine",
+    "model": "PERFUME VENDING / RP-01",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/perfume-vending-main.png",
+    "copy": "A compact self-service solution for malls, hotels, airports and branded pop-up environments.",
+    "specs": [
+      "Branded exterior customization",
+      "Local payment matching"
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Smart Snack & Drink Vending Machine",
+    "model": "SNACK & DRINKS / RV-01",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/smart-vending-2-main.png",
+    "copy": "Flexible channels and product configurations with smart temperature control and remote management.",
+    "specs": [
+      "Multiple shelf and channel options",
+      "For malls, campuses and hotels"
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Smart Vending Machine",
+    "model": "SMART VENDING / RV-02",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/smart-vending-3-main.png",
+    "copy": "A modular machine for unattended retail projects, configured around products and location.",
+    "specs": [
+      "Inventory management",
+      "4G / Wi-Fi / Ethernet options"
+    ]
+  },
+  {
+    "id": 14,
+    "name": "Custom Smart Vending Machine",
+    "model": "SMART VENDING / RV-03",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/smart-vending-4-white-v2.png",
+    "copy": "Customize the appearance, colors, logo, UI, languages and payment system for your market.",
+    "specs": [
+      "OEM / ODM project cooperation",
+      "Final setup based on project needs"
+    ]
+  },
+  {
+    "id": 15,
+    "name": "Claw & Prize Machine",
+    "model": "DOLL MACHINE / DM-R23",
+    "category": "Commercial Entertainment",
+    "image": "/assets/images/products/new/doll-dm-r23-main.png",
+    "gallery": [
+      "/assets/images/products/new/doll-dm-r23-main.png",
+      "/assets/images/products/new/doll-dm-r23-view.png"
+    ],
+    "copy": "For malls, indoor amusement parks, arcades and entertainment centers, with configurable appearance, language and payment setup.",
+    "specs": [
+      "110 / 220V · 1 player",
+      "Adjustable win rate · 12-month warranty"
+    ]
+  },
+  {
+    "id": 16,
+    "name": "VR Space Wheel",
+    "model": "VR ENTERTAINMENT / VR SPACE WHEEL",
+    "category": "Commercial Entertainment",
+    "image": "/assets/images/products/new/vr-space-wheel-main.png",
+    "gallery": [
+      "/assets/images/products/new/vr-space-wheel-main.png",
+      "/assets/images/products/new/vr-space-wheel-view.png"
+    ],
+    "copy": "An interactive VR experience for malls, commercial amusement parks and indoor entertainment venues.",
+    "specs": [
+      "2150×1280×1350mm",
+      "222kg · 1 player · AC220–230V"
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Phone Case Printer Vending Machine",
+    "model": "PHONE CASE PRINTER / PCV-01",
+    "category": "Smart Vending",
+    "image": "/assets/images/products/new/phone-case-printer-main.png",
+    "gallery": [
+      "/assets/images/products/new/phone-case-printer-main.png",
+      "/assets/images/products/new/phone-case-printer-view.png"
+    ],
+    "copy": "Print customized phone cases on demand for malls, hotels, amusement venues, universities and branded stores.",
+    "specs": [
+      "300–600 pcs · 130×90×192cm",
+      "Wi-Fi / 4G LTE / Ethernet · CE / CB / KC / PSE"
+    ]
+  }
+]

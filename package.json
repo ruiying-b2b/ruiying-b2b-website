@@ -1,0 +1,10 @@
+{
+  "name": "ruiying-site",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Ruiying B2B 独立站，产品数据由 Pages CMS 维护，构建时注入静态页面",
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}
