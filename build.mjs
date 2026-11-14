@@ -1,5 +1,9 @@
 // 构建脚本：把站点基线 site/ 复制到 dist/，再把 content/*.json 里的内容注入进去。
-// Vercel 上的构建命令就是 `node build.mjs`。
+// 构建命令（Netlify）：npm run build → node build.mjs
+//
+// 可选环境变量：
+//   SKIP_INDEXNOW=1   跳过 IndexNow 推送（本地调试用）
+//   INDEXNOW_KEY=xxx  覆盖 IndexNow 密钥（默认用仓库里 site/<key>.txt 那一串）
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -123,6 +127,7 @@ for (const p of products) {
 log(`✓ 图片检查完成，缺失 ${missing} 个`);
 
 // ---------- 7. canonical + sitemap ----------
+const routes = ['/', '/products', '/about', '/contact'];
 const domain = (site.domain || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
 if (domain) {
   const idx = path.join(DIST, 'index.html');
@@ -136,7 +141,6 @@ if (domain) {
     log(`✓ 已写入 canonical：https://${domain}/`);
   }
 
-  const routes = ['/', '/products', '/about', '/contact'];
   const urls = routes
     .map((r) => `  <url><loc>https://${domain}${r}</loc><changefreq>monthly</changefreq></url>`)
     .join('\n');
@@ -151,11 +155,44 @@ if (domain) {
 }
 
 // ---------- 8. 汇总 ----------
-const total = fs
-  .readdirSync(DIST)
-  .length;
+const total = fs.readdirSync(DIST).length;
 log(`\n构建完成 → dist/（顶层 ${total} 项）`);
 if (warn.length) {
   log('\n⚠ 警告：');
   for (const w of warn) log('  - ' + w);
 }
+
+// ---------- 9. IndexNow 推送（Bing / Yandex 快速收录，失败绝不影响部署） ----------
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY || 'DDACBDC9CB797706119AA3421D34940E';
+
+async function pingIndexNow() {
+  if (!domain) {
+    log('· 没有 domain，跳过 IndexNow 推送');
+    return;
+  }
+  if (process.env.SKIP_INDEXNOW === '1') {
+    log('· 已跳过 IndexNow 推送（SKIP_INDEXNOW=1）');
+    return;
+  }
+  if (process.env.CONTEXT && process.env.CONTEXT !== 'production') {
+    log(`· 非生产构建（CONTEXT=${process.env.CONTEXT}），跳过 IndexNow 推送`);
+    return;
+  }
+  const payload = {
+    host: domain,
+    key: INDEXNOW_KEY,
+    keyLocation: `https://${domain}/${INDEXNOW_KEY}.txt`,
+    urlList: routes.map((r) => `https://${domain}${r}`),
+  };
+  const res = await fetch('https://api.indexnow.org/indexnow', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(15000),
+  });
+  log(`✓ IndexNow 已推送 ${payload.urlList.length} 个 URL（HTTP ${res.status}）`);
+}
+
+pingIndexNow().catch((e) => {
+  log(`⚠ IndexNow 推送失败（不影响部署）：${e.message}`);
+});
