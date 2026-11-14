@@ -5,10 +5,18 @@
     "model": "POPCORN VENDING / PR30",
     "category": "Food & Treat Equipment",
     "image": "/assets/images/products/popcorn-pr30-main.webp",
-    "copy": "Designed for malls, cinemas and amusement venues, with flavor options, QR / coin payment and remote management.",
+    "copy": "Popcorn Vending Machine Product Features\n● Unmanned operation\n\n● No network required; comes with a 4G module.\n\n● Can remotely view sales data\n\n● Fully automatic export quality\n\n● Dual flavor, food-grade certification\n\n● Machine configuration upgrade, strong stability\n\n● Freshly made\nDesigned for malls, cinemas and amusement venues",
     "specs": [
-      "120–180 sec. production time",
-      "220V / 110V · 2000W"
+      "Size:970*695*2290mm",
+      "220V / 110V · 2000W",
+      "Weight:230KG",
+      "Capacity:4kg corn, 100 cups popcorn",
+      "Payment method: Coin/bill acceptor,Card reader,QR code"
+    ],
+    "gallery": [
+      "/assets/images/products/img-mu6gglg0-2f853e84.webp",
+      "/assets/images/products/微信图片_2026-09-18_170503_771.webp",
+      "/assets/images/products/微信图片_2026-09-18_170506_650.webp"
     ]
   },
   {
@@ -20,7 +28,16 @@
     "copy": "Supports multilingual interfaces and multiple payment options for standardized commercial deployment.",
     "specs": [
       "60-cup capacity",
-      "Approx. 150 cups per refill"
+      "Capacity:150 cups per refill",
+      "Dimension：480mm*515mm*1700mm",
+      "Taste：2 Flavors",
+      "Voltage:110V/220V",
+      "Weight:69KG",
+      "Production duration:100s"
+    ],
+    "gallery": [
+      "/assets/images/products/6f447b65db32e6373c509eb6970a6b63.webp",
+      "/assets/images/products/45ffd8edf9734eee0b56f0a433cff8a9.webp"
     ]
   },
   {
