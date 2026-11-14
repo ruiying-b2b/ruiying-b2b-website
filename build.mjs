@@ -130,6 +130,8 @@ log(`✓ 图片检查完成，缺失 ${missing} 个`);
 // 单页应用默认所有路径返回同一份 index.html，导致每个页面都自称「首页的副本」，
 // 搜索引擎会把 /products、/about、/contact 判为重复页面而拒绝收录。
 // 这里给每个路由落一份独立 HTML，只改 head，不动页面渲染逻辑。
+//
+// description 控制在 100–150 字符：过长或过短 Bing 会报「Meta Description too long or too short」。
 const routes = ['/', '/products', '/about', '/contact'];
 
 const PAGES = {
@@ -139,15 +141,15 @@ const PAGES = {
   },
   '/products': {
     title: 'Products — Vending & Entertainment Equipment | Ruiying',
-    desc: 'Ruiying product lines for OEM / ODM buyers: smart vending machines, popcorn and cotton candy equipment, ice cream machines, claw machines, VR rides and phone case printers.',
+    desc: '17 vending, entertainment and self-service equipment lines for OEM / ODM buyers, from popcorn machines to VR rides.',
   },
   '/about': {
     title: 'About Ruiying — Vending Equipment Supplier & OEM Partner',
-    desc: 'Ruiying is a Guangzhou based supplier of vending and commercial entertainment equipment, supporting global OEM / ODM projects with CE approved hardware.',
+    desc: 'Guangzhou based supplier of vending and entertainment equipment, serving overseas OEM / ODM projects with CE approved hardware.',
   },
   '/contact': {
     title: 'Contact Ruiying — OEM / ODM Inquiry',
-    desc: 'Contact Ruiying for vending machine and entertainment equipment inquiries by email, WhatsApp or phone. OEM / ODM project support for global buyers.',
+    desc: 'Talk to Ruiying about your vending or entertainment equipment project. Email, WhatsApp and phone for OEM / ODM buyers.',
   },
 };
 
