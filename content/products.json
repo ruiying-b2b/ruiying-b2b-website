@@ -5,7 +5,7 @@
     "model": "POPCORN VENDING / PR30",
     "category": "Food & Treat Equipment",
     "image": "/assets/images/products/popcorn-pr30-main.png",
-    "copy": "Designed for malls, cinemas and amusement venues, with flavor options, QR / coin payment and remote management.",
+    "copy": "Designed for malls, cinemas and amusement venues, with flavor options, QR / coin payment and remote management.Fast delivery available",
     "specs": [
       "120–180 sec. production time",
       "220V / 110V · 2000W"
@@ -173,14 +173,14 @@
     "model": "DOLL MACHINE / DM-R23",
     "category": "Commercial Entertainment",
     "image": "/assets/images/products/new/doll-dm-r23-main.png",
-    "gallery": [
-      "/assets/images/products/new/doll-dm-r23-main.png",
-      "/assets/images/products/new/doll-dm-r23-view.png"
-    ],
     "copy": "For malls, indoor amusement parks, arcades and entertainment centers, with configurable appearance, language and payment setup.",
     "specs": [
       "110 / 220V · 1 player",
       "Adjustable win rate · 12-month warranty"
+    ],
+    "gallery": [
+      "/assets/images/products/new/doll-dm-r23-main.png",
+      "/assets/images/products/new/doll-dm-r23-view.png"
     ]
   },
   {
@@ -189,14 +189,14 @@
     "model": "VR ENTERTAINMENT / VR SPACE WHEEL",
     "category": "Commercial Entertainment",
     "image": "/assets/images/products/new/vr-space-wheel-main.png",
-    "gallery": [
-      "/assets/images/products/new/vr-space-wheel-main.png",
-      "/assets/images/products/new/vr-space-wheel-view.png"
-    ],
     "copy": "An interactive VR experience for malls, commercial amusement parks and indoor entertainment venues.",
     "specs": [
       "2150×1280×1350mm",
       "222kg · 1 player · AC220–230V"
+    ],
+    "gallery": [
+      "/assets/images/products/new/vr-space-wheel-main.png",
+      "/assets/images/products/new/vr-space-wheel-view.png"
     ]
   },
   {
@@ -205,14 +205,14 @@
     "model": "PHONE CASE PRINTER / PCV-01",
     "category": "Smart Vending",
     "image": "/assets/images/products/new/phone-case-printer-main.png",
-    "gallery": [
-      "/assets/images/products/new/phone-case-printer-main.png",
-      "/assets/images/products/new/phone-case-printer-view.png"
-    ],
     "copy": "Print customized phone cases on demand for malls, hotels, amusement venues, universities and branded stores.",
     "specs": [
       "300–600 pcs · 130×90×192cm",
       "Wi-Fi / 4G LTE / Ethernet · CE / CB / KC / PSE"
+    ],
+    "gallery": [
+      "/assets/images/products/new/phone-case-printer-main.png",
+      "/assets/images/products/new/phone-case-printer-view.png"
     ]
   }
 ]
