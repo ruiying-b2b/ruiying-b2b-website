@@ -10,7 +10,7 @@
 你在后台改 content/products.json
         ↓ 自动 commit 到 GitHub main
 Netlify 检测到提交，执行 npm run build（= node build.mjs）
-        ↓ 把产品数据注入页面、写 canonical、生成 sitemap、推 IndexNow
+        ↓ 把产品数据注入页面、给 4 个页面各写独立 canonical / title、生成 sitemap、推 IndexNow
 官网 60 秒内自动更新，不需要碰代码
 ```
 
@@ -30,7 +30,7 @@ site/                    站点基线（页面设计、CSS、图片），一般�
   assets/index-*.js      页面与布局（编译产物）
   assets/index-*.css     样式
   assets/images/         所有图片（含 logo、20 张产品图 webp）
-build.mjs                构建脚本：注入数据、canonical、sitemap、IndexNow
+build.mjs                构建脚本：注入数据、生成 4 个页面各自的 canonical / title、sitemap、IndexNow
 .pages.yml               后台表单定义（字段、分类选项、图片上传位置）
 package.json             scripts.build = node build.mjs
 ```
@@ -88,11 +88,32 @@ Netlify 里 `gzruiying.com` 是主域，`www.gzruiying.com` 301 跳到主域。�
 
 | 项目 | 状态 |
 |---|---|
-| `https://gzruiying.com/sitemap.xml` | 生成中，4 条 URL：`/`、`/products`、`/about`、`/contact` |
+| `https://gzruiying.com/sitemap.xml` | 4 条 URL：`/`、`/products`、`/about`、`/contact` |
 | `https://gzruiying.com/robots.txt` | 有，含 `Sitemap:` 指路 |
-| canonical | 每页指向 `https://gzruiying.com/`（apex，不带 www） |
-| Bing Webmaster | 已验证，sitemap 已提交，IndexNow 已推送 |
+| canonical | **每个页面各自指向自己的网址**（`/` → `/`，`/products` → `/products` …） |
+| Bing Webmaster | 已验证，sitemap 已提交，IndexNow 已推送，4 个 URL 已请求编入索引 |
 | Google Search Console | 待办：需能访问 Google 的网络环境后，按 DNS TXT 方式验证并提交 sitemap |
+
+### 每个页面独立 HTML（务必不要改回单页一份）
+
+站点是单页应面，默认所有路径都返回同一份 `index.html`，于是 `/products`、`/about`、`/contact`
+都自称「首页的副本」，搜索引擎会判为重复页面而拒绍收录（Bing 报的是
+`URL cannot be indexed by Bing — page is an alternate version`，canonical 指向首页）。
+
+`build.mjs` 第 7 段因此给 4 个路由各生成一份 HTML，只改 `head`、不动页面渲染：
+
+| 文件 | 对应网址 |
+|---|---|
+| `dist/index.html` | `/` |
+| `dist/products.html` | `/products` |
+| `dist/about.html` | `/about` |
+| `dist/contact.html` | `/contact` |
+
+两个坑：
+
+- 必须用**平铺文件**（`products.html`），不要用目录（`products/index.html`）。目录形式会让 Netlify
+  把 `/products` 301 跳到 `/products/`，与 canonical 里的 `/products` 不一致，又会被判成「替代版本」。
+- 新增页面时，`build.mjs` 里的 `routes` 和 `PAGES` 两处要同时加，sitemap 会自动跟着生成。
 
 ### IndexNow 自动推送
 
@@ -130,6 +151,7 @@ npx serve dist
 | 后台看不到「产品」菜单 / 传图报 No media configuration | `.pages.yml` 被改坏或没推上去，回到数组形式的 `media` 配置 |
 | 后台报 media 配置错 | `media` 必须写成数组（`- name: / label: / input: / output: / extensions:`），不能写成以名字为 key 的对象 |
 | 邮件收不到 | 检查阿里云 MX 三条是否还在、`@` 是否被错加了 CNAME |
+| Bing 报 `page is an alternate version`，canonical 指向首页 | 各页面 HTML 没生成或被改回目录形式，检查 `dist/products.html` 等 4 个文件是否存在 |
 | 本机 `git push` 失败（Connection reset） | 本机到 github.com:443 被墙，走 Netlify/后台（服务器侧通信）不受影响；要同步本地副本需网络环境支持 |
 
 ## 九、本该做但没做的
@@ -137,3 +159,4 @@ npx serve dist
 1. 仓库里仍留着 20 张原始 PNG/JPEG（约 39 MB），访客不再下载，只占仓库体积。等网络方便时删掉。
 2. Google Search Console 未做（需要能访问 Google 的网络）。
 3. 首页 / About 文案仍在页面基线里，后台改不了；要做成可编辑需要再改一次基线。
+4. 产品页有 6 张图没写 alt 文字（Bing 已在 Live URL 里点名）；页面里还残留几处中文（如「获取参数」「图片浏览」）未英文化。
