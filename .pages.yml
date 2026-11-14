@@ -2,9 +2,11 @@
 # 文档：https://pagescms.org/docs/configuration/
 
 media:
-  products:
+  - name: products
+    label: 产品图片
     input: site/assets/images/products
     output: /assets/images/products
+    extensions: [jpg, jpeg, png, webp]
 
 content:
   - name: products
@@ -45,7 +47,6 @@ content:
         required: true
         options:
           media: products
-          path: site/assets/images/products
           extensions: [jpg, jpeg, png, webp]
       - name: copy
         label: 卖点描述（英文，2 句以内）
@@ -60,10 +61,9 @@ content:
         type: image
         options:
           media: products
-          path: site/assets/images/products
           extensions: [jpg, jpeg, png, webp]
           multiple:
-            extensions: [jpg, jpeg, png, webp]
+            max: 8
 
   - name: site
     label: 联系方式
