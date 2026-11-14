@@ -194,9 +194,10 @@ if (domain) {
     if (r === '/') {
       fs.writeFileSync(baseFile, html, 'utf8');
     } else {
-      const dir = path.join(DIST, r.slice(1));
-      fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+      // 用平铺文件（dist/products.html）而不是目录（dist/products/index.html）：
+      // 目录形式会让 Netlify 把 /products 301 跳到 /products/，
+      // 与 canonical 里的 /products 不一致，又会被判成「替代版本」。
+      fs.writeFileSync(path.join(DIST, `${r.slice(1)}.html`), html, 'utf8');
     }
   }
   log(`✓ 已生成 ${routes.length} 个页面（各自独立 canonical / title / description）`);
