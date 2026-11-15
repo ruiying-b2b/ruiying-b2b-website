@@ -183,6 +183,104 @@ function applyMeta(html, { title, desc, url }) {
   return out;
 }
 
+// ---------- 7b. 预渲染静态正文 ----------
+// 基线是纯前端渲染：原始 HTML 里 <div id="root"></div> 是空的，页面只有 838 字节，
+// 搜索引擎抓到的相当于空白页（Bing 因此报 H1 tag missing、判为 discovered but not crawled）。
+// 这里把每个路由的正文以静态 HTML 写进 #root，React 挂载后会整体替换，用户看到不变。
+const escHtml = (s) =>
+  String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+const H1 = 'font-family:var(--font-display,system-ui,sans-serif);font-size:clamp(26px,4vw,42px);line-height:1.15;margin:0 0 14px;color:var(--color-text,#17212b)';
+const LEAD = 'font-size:17px;line-height:1.6;color:var(--color-text-muted,#5c6b7a);margin:0 0 22px;max-width:760px';
+const P = 'line-height:1.65;margin:0 0 14px;max-width:760px';
+const H2 = 'font-family:var(--font-display,system-ui,sans-serif);font-size:20px;margin:32px 0 12px;color:var(--color-text,#17212b)';
+const LI = 'background:#fff;border:1px solid var(--color-border,#d9e2ea);border-radius:12px;padding:14px 16px';
+const MUTED = 'color:var(--color-text-muted,#5c6b7a);font-size:14px;line-height:1.5;margin-top:6px';
+
+const navHtml = `<nav style="font-size:14px;margin-bottom:26px">
+  <a href="/">Home</a> ·
+  <a href="/products">Products</a> ·
+  <a href="/about">About Us</a> ·
+  <a href="/contact">Contact</a>
+</nav>`;
+
+const contactHtml = `
+<h2 style="${H2}">Contact</h2>
+<p style="${P}">
+  Email: <a href="mailto:${escHtml(site.email || 'quinn@gzruiying.com')}">${escHtml(site.email || 'quinn@gzruiying.com')}</a><br />
+  Phone / WhatsApp: ${escHtml(site.phoneDisplay || '+86 198 0203 8683')}<br />
+  Address: 1 Hengjun Avenue, Lingbian Village, Shiqi Town, Panyu District, Guangzhou, China
+</p>`;
+
+const productItems = products
+  .map(
+    (p) => `<li style="${LI}">
+    <a href="/contact?product=${encodeURIComponent(p.name)}"><strong style="font-size:16px">${escHtml(p.name)}</strong></a>
+    <div style="${MUTED}">Model: ${escHtml(p.model)} · Category: ${escHtml(p.category)}</div>
+    <div style="${MUTED}">${escHtml(p.copy)}</div>
+    <div style="${MUTED}">${p.specs.map((s) => escHtml(s)).join(' · ')}</div>
+  </li>`
+  )
+  .join('\n');
+
+const PRERENDER = {
+  '/': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
+    ${navHtml}
+    <h1 style="${H1}">Ruiying — Commercial Equipment OEM / ODM</h1>
+    <p style="${LEAD}">Guangzhou-based supplier of smart vending machines, commercial entertainment equipment and self-service solutions, serving OEM / ODM buyers in the United States, Europe, Mexico and the Middle East.</p>
+    <p style="${P}">Ruiying supports equipment sourcing and OEM / ODM cooperation across ${products.length} equipment lines, from popcorn and ice cream vending machines to VR rides, claw machines and self-service kiosks. Every unit is configured for the destination market — 110V / 220V, local payment terminals and CE documentation where required.</p>
+    <h2 style="${H2}">Equipment lines</h2>
+    <ul style="list-style:none;padding:0;margin:0;display:grid;gap:10px">
+      ${productItems}
+    </ul>
+    ${contactHtml}
+  </div>`,
+
+  '/products': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
+    ${navHtml}
+    <h1 style="${H1}">Products — Vending &amp; Entertainment Equipment</h1>
+    <p style="${LEAD}">${products.length} vending, entertainment and self-service equipment lines for OEM / ODM buyers, from popcorn machines to VR rides.</p>
+    <p style="${P}">Each listing shows the model, the short sales description and the key technical points. Tell us the model you are interested in and we will send the full spec sheet, options list and quotation.</p>
+    <h2 style="${H2}">Full catalogue</h2>
+    <ul style="list-style:none;padding:0;margin:0;display:grid;gap:10px">
+      ${productItems}
+    </ul>
+    ${contactHtml}
+  </div>`,
+
+  '/about': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
+    ${navHtml}
+    <h1 style="${H1}">About Ruiying — Vending Equipment Supplier &amp; OEM Partner</h1>
+    <p style="${LEAD}">Guangzhou Ruiying Electronic Equipment supplies smart vending machines, entertainment equipment and self-service solutions to overseas distributors, operators and brand owners.</p>
+    <p style="${P}">We work as an engineering and sourcing partner rather than a pure reseller: equipment is specified for the destination market, adapted for local payment and power standards, and documented for import clearance. Ruiying covers ${products.length} equipment lines across vending, food and treat equipment and commercial entertainment.</p>
+    <p style="${P}">Typical cooperation models are OEM (your branding, your packaging, your firmware language) and ODM (our proven platform adapted to your market). Volume programmes are supported with spare parts planning, remote monitoring and after-sales documentation.</p>
+    <p style="${P}"><a href="/products">Browse the equipment catalogue</a> or <a href="/contact">send a project inquiry</a>.</p>
+    ${contactHtml}
+  </div>`,
+
+  '/contact': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
+    ${navHtml}
+    <h1 style="${H1}">Contact Ruiying — OEM / ODM Inquiry</h1>
+    <p style="${LEAD}">Tell us what equipment you are looking for, your target market and project stage. Ruiying supports equipment sourcing and OEM / ODM cooperation for the United States, Europe, Mexico and the Middle East.</p>
+    <p style="${P}">Write to us with the model or equipment type, the voltage and payment configuration required for your market, and your target quantity. We reply with the spec sheet, options list and an indicative quotation.</p>
+    ${contactHtml}
+    <p style="${P}">See also: <a href="/products">equipment catalogue</a>, <a href="/about">about Ruiying</a>.</p>
+  </div>`,
+};
+
+function injectPrerender(html, route) {
+  const inner = PRERENDER[route];
+  if (!inner) return html;
+  if (html.includes('<div id="root"></div>')) {
+    return html.replace('<div id="root"></div>', `<div id="root">${inner}</div>`);
+  }
+  return html.replace(/<div id="root"[^>]*><\/div>/, `<div id="root">${inner}</div>`);
+}
+
 const domain = (site.domain || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
 if (domain) {
   const baseFile = path.join(DIST, 'index.html');
@@ -191,7 +289,7 @@ if (domain) {
   for (const r of routes) {
     const meta = PAGES[r];
     const url = `https://${domain}${r}`;
-    const html = applyMeta(baseHtml, { title: meta.title, desc: meta.desc, url });
+    const html = injectPrerender(applyMeta(baseHtml, { title: meta.title, desc: meta.desc, url }), r);
 
     if (r === '/') {
       fs.writeFileSync(baseFile, html, 'utf8');
