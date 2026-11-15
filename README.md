@@ -10,7 +10,7 @@
 你在后台改 content/products.json
         ↓ 自动 commit 到 GitHub main
 Netlify 检测到提交，执行 npm run build（= node build.mjs）
-        ↓ 把产品数据注入页面、给 4 个页面各写独立 canonical / title、生成 sitemap、推 IndexNow
+        ↓ 把产品数据注入页面、给 4 个页面各写独立 canonical / title、预渲染正文、生成 sitemap、推 IndexNow
 官网 60 秒内自动更新，不需要碰代码
 ```
 
@@ -29,8 +29,9 @@ site/                    站点基线（页面设计、CSS、图片），一般�
   _redirects             SPA 路由兜底（/* → /index.html 200）
   assets/index-*.js      页面与布局（编译产物）
   assets/index-*.css     样式
-  assets/images/         所有图片（含 logo、20 张产品图 webp）
-build.mjs                构建脚本：注入数据、生成 4 个页面各自的 canonical / title、sitemap、IndexNow
+  assets/images/         所有图片（含 logo、产品图 webp）
+build.mjs                构建脚本：注入数据、生成 4 个页面各自的 canonical / title、预渲染正文、sitemap、IndexNow
+serve.py                 本地预览服务器（模拟 Netlify 把 /products 改写到 products.html）
 .pages.yml               后台表单定义（字段、分类选项、图片上传位置）
 package.json             scripts.build = node build.mjs
 ```
@@ -77,9 +78,9 @@ Netlify 里 `gzruiying.com` 是主域，`www.gzruiying.com` 301 跳到主域。�
 
 ## 五、图片规范（重要）
 
-产品图全部是 **WebP**，长边 1400px，质量 82。20 张图合计 **1.56 MB**（原始 PNG/JPEG 是 39 MB）。
+产品图全部是 **WebP**，长边 1400px，质量 82。一张图一般在 30–170 KB。
 
-**上传新图前先压缩**，否则 `/products` 会重新变慢。目标：单张 ≤ 150 KB。工具随便挑一个在线压缩站，导出 WebP、长边 1400 即可。
+**上传新图前先压缩**，否则 `/products` 会重新变慢，而且 PagesCMS 单个文件超过约 1 MB 会直接报 `Failed to upload file: 413`。目标：单张 ≤ 150 KB。
 
 原始高分辨率图备份在本地：
 `C:\Users\quinn\Doubao\chats\2026-11-14\new-chat-2\原图备份\`
@@ -91,13 +92,14 @@ Netlify 里 `gzruiying.com` 是主域，`www.gzruiying.com` 301 跳到主域。�
 | `https://gzruiying.com/sitemap.xml` | 4 条 URL：`/`、`/products`、`/about`、`/contact` |
 | `https://gzruiying.com/robots.txt` | 有，含 `Sitemap:` 指路 |
 | canonical | **每个页面各自指向自己的网址**（`/` → `/`，`/products` → `/products` …） |
+| 页面正文 | **已预渲染进 HTML**，爬虫不用跑 JS 也能读到内容（见下节） |
 | Bing Webmaster | 已验证，sitemap 已提交，IndexNow 已推送，4 个 URL 已请求编入索引 |
 | Google Search Console | 待办：需能访问 Google 的网络环境后，按 DNS TXT 方式验证并提交 sitemap |
 
 ### 每个页面独立 HTML（务必不要改回单页一份）
 
-站点是单页应面，默认所有路径都返回同一份 `index.html`，于是 `/products`、`/about`、`/contact`
-都自称「首页的副本」，搜索引擎会判为重复页面而拒绍收录（Bing 报的是
+站点是单页应用，默认所有路径都返回同一份 `index.html`，于是 `/products`、`/about`、`/contact`
+都自称「首页的副本」，搜索引擎会判为重复页面而拒绝收录（Bing 报的是
 `URL cannot be indexed by Bing — page is an alternate version`，canonical 指向首页）。
 
 `build.mjs` 第 7 段因此给 4 个路由各生成一份 HTML，只改 `head`、不动页面渲染：
@@ -114,6 +116,33 @@ Netlify 里 `gzruiying.com` 是主域，`www.gzruiying.com` 301 跳到主域。�
 - 必须用**平铺文件**（`products.html`），不要用目录（`products/index.html`）。目录形式会让 Netlify
   把 `/products` 301 跳到 `/products/`，与 canonical 里的 `/products` 不一致，又会被判成「替代版本」。
 - 新增页面时，`build.mjs` 里的 `routes` 和 `PAGES` 两处要同时加，sitemap 会自动跟着生成。
+
+### 预渲染静态正文（爬虫能看到真正的内容）
+
+站点是纯前端渲染，原始 HTML 里只有一个空的 `<div id="root"></div>`（约 838 字节）。
+搜索引擎如果按原始 HTML 判断，看到的就是空白页 —— Bing 会报 `H1 tag missing`，
+状态停在 `Discovered but not crawled`，也就是「知道有这个网址，但不值得来抓」。
+
+`build.mjs` 第 7b 段因此把每个路由的正文以静态 HTML 写进 `#root`：h1 标题、公司介绍、
+全部产品的名称 / 型号 / 分类 / 卖点 / 参数、指向 `/contact?product=...` 的内链、联系方式。
+React 挂载后会整体替换掉这段静态内容，用户看到的画面完全不变。
+
+| 页面 | 改动前 | 改动后 |
+|---|---|---|
+| `/` | 806 字节，空 div | 约 16 KB |
+| `/products` | 838 字节，空 div | 约 16 KB |
+| `/about` | 844 字节，空 div | 约 2.9 KB |
+| `/contact` | 797 字节，空 div | 约 2.4 KB |
+
+改文案的位置：`build.mjs` 里的 `PRERENDER` 对象（按路由分四段）。产品列表是从
+`content/products.json` 自动生成的，**改产品不需要动这里**；只有改标题、介绍段落才需要动。
+
+两个注意点：
+
+- 静态内容用的是站内 CSS 变量（`--color-text`、`--color-border` 等），所以看起来跟站内风格接近。
+  如果哪天换了配色变量名，这段会退回默认样式，但文字仍在、不影响收录。
+- 静态内容必须和 React 渲染出来的内容大体一致。不要在这里写页面上没有的夸大文字 ——
+  内容和实际页面不一致属于 cloaking，是搜索引擎明确禁止的。
 
 ### IndexNow 自动推送
 
@@ -136,10 +165,16 @@ curl.exe -s -X POST "https://api.indexnow.org/indexnow" -H "Content-Type: applic
 ```powershell
 Set-Location "C:\Users\quinn\Doubao\chats\2026-11-14\new-chat-2\ruiying-cms"
 $env:SKIP_INDEXNOW='1'; node build.mjs
-npx serve dist
+python serve.py 8089 (Join-Path (Get-Location) "dist")   # 打开 http://127.0.0.1:8089/products
 ```
 
 `SKIP_INDEXNOW=1` 是本地调试时不要往搜索引擎推假更新。
+
+用 `serve.py` 而不是 `npx serve`：站点把 `/products` 这类无扩展名路径映射到 `products.html`，
+普通静态服务器不认这个映射，用 `/products.html` 打开时前端路由会当成未知路径、显示 404。
+
+注意：`serve.py` 起服务时占着 `dist` 目录，这时改代码要**先停掉服务**再 `node build.mjs`，
+否则构建第一步删 `dist` 会报 `EBUSY: resource busy or locked`。
 
 ## 八、出问题怎么查
 
@@ -150,8 +185,10 @@ npx serve dist
 | 产品图裂了 | `image` 必须是 `/assets/images/products/xxx.webp` 形式，且文件真在 `site/assets/images/products/` 下 |
 | 后台看不到「产品」菜单 / 传图报 No media configuration | `.pages.yml` 被改坏或没推上去，回到数组形式的 `media` 配置 |
 | 后台报 media 配置错 | `media` 必须写成数组（`- name: / label: / input: / output: / extensions:`），不能写成以名字为 key 的对象 |
+| 传图报 `Failed to upload file: 413` | 单个文件超过约 1 MB，先压成 WebP（长边 1400、质量 82）再传 |
 | 邮件收不到 | 检查阿里云 MX 三条是否还在、`@` 是否被错加了 CNAME |
 | Bing 报 `page is an alternate version`，canonical 指向首页 | 各页面 HTML 没生成或被改回目录形式，检查 `dist/products.html` 等 4 个文件是否存在 |
+| Bing 报 `H1 tag missing` 或页面停在 `Discovered but not crawled` | 预渲染段没生效，检查线上 HTML 大小是否只有几百字节（正常应 2–16 KB） |
 | 本机 `git push` 失败（Connection reset） | 本机到 github.com:443 被墙，走 Netlify/后台（服务器侧通信）不受影响；要同步本地副本需网络环境支持 |
 
 ## 九、本该做但没做的
@@ -160,3 +197,4 @@ npx serve dist
 2. Google Search Console 未做（需要能访问 Google 的网络）。
 3. 首页 / About 文案仍在页面基线里，后台改不了；要做成可编辑需要再改一次基线。
 4. 产品页有 6 张图没写 alt 文字（Bing 已在 Live URL 里点名）；页面里还残留几处中文（如「获取参数」「图片浏览」）未英文化。
+5. 没有产品独立详情页：点产品卡片不会跳转，只有「获取参数」跳到联系页并预填产品名。要做自己的产品页需要另外生成静态页面。
