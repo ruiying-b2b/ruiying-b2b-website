@@ -1,5 +1,6 @@
 // 构建脚本：把站点基线 site/ 复制到 dist/，再把 content/*.json 里的内容注入进去。
-// 构建命令（Netlify）：npm run build → node build.mjs
+// 构建命令：npm run build → node build.mjs
+// 托管：GitHub Pages（仓库 Actions 构建 dist，见 .github/workflows/pages.yml）
 //
 // 可选环境变量：
 //   SKIP_INDEXNOW=1   跳过 IndexNow 推送（本地调试用）
@@ -127,27 +128,31 @@ for (const p of products) {
 log(`✓ 图片检查完成，缺失 ${missing} 个`);
 
 // ---------- 7. 每个路由生成独立 HTML（canonical / title / description 各不相同） ----------
-// 单页应用默认所有路径返回同一份 index.html，导致每个页面都自称「首页的副本」，
+// 单页应用默认所有路径都返回同一份 index.html，导致每个页面都自称「首页的副本」，
 // 搜索引擎会把 /products、/about、/contact 判为重复页面而拒绝收录。
 // 这里给每个路由落一份独立 HTML，只改 head，不动页面渲染逻辑。
 //
+// GitHub Pages 不能像 Netlify 那样把 /products 改写到 products.html，
+// 所以这里落成目录形式（products/index.html），对外网址带尾斜杠（/products/）。
+// canonical / sitemap / IndexNow 全部使用带尾斜杠的写法，与实际网址一致。
+//
 // description 控制在 100–150 字符：过长或过短 Bing 会报「Meta Description too long or too short」。
-const routes = ['/', '/products', '/about', '/contact'];
+const routes = ['/', '/products/', '/about/', '/contact/'];
 
 const PAGES = {
   '/': {
     title: 'Ruiying — Commercial Equipment OEM / ODM',
     desc: 'Ruiying develops smart vending machines, commercial entertainment equipment and self-service solutions for global OEM / ODM buyers.',
   },
-  '/products': {
+  '/products/': {
     title: 'Products — Vending & Entertainment Equipment | Ruiying',
     desc: '17 vending, entertainment and self-service equipment lines for OEM / ODM buyers, from popcorn machines to VR rides.',
   },
-  '/about': {
+  '/about/': {
     title: 'About Ruiying — Vending Equipment Supplier & OEM Partner',
     desc: 'Guangzhou based supplier of vending and entertainment equipment, serving overseas OEM / ODM projects with CE approved hardware.',
   },
-  '/contact': {
+  '/contact/': {
     title: 'Contact Ruiying — OEM / ODM Inquiry',
     desc: 'Talk to Ruiying about your vending or entertainment equipment project. Email, WhatsApp and phone for OEM / ODM buyers.',
   },
@@ -203,9 +208,9 @@ const MUTED = 'color:var(--color-text-muted,#5c6b7a);font-size:14px;line-height:
 
 const navHtml = `<nav style="font-size:14px;margin-bottom:26px">
   <a href="/">Home</a> ·
-  <a href="/products">Products</a> ·
-  <a href="/about">About Us</a> ·
-  <a href="/contact">Contact</a>
+  <a href="/products/">Products</a> ·
+  <a href="/about/">About Us</a> ·
+  <a href="/contact/">Contact</a>
 </nav>`;
 
 const contactHtml = `
@@ -219,7 +224,7 @@ const contactHtml = `
 const productItems = products
   .map(
     (p) => `<li style="${LI}">
-    <a href="/contact?product=${encodeURIComponent(p.name)}"><strong style="font-size:16px">${escHtml(p.name)}</strong></a>
+    <a href="/contact/?product=${encodeURIComponent(p.name)}"><strong style="font-size:16px">${escHtml(p.name)}</strong></a>
     <div style="${MUTED}">Model: ${escHtml(p.model)} · Category: ${escHtml(p.category)}</div>
     <div style="${MUTED}">${escHtml(p.copy)}</div>
     <div style="${MUTED}">${p.specs.map((s) => escHtml(s)).join(' · ')}</div>
@@ -240,7 +245,7 @@ const PRERENDER = {
     ${contactHtml}
   </div>`,
 
-  '/products': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
+  '/products/': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
     ${navHtml}
     <h1 style="${H1}">Products — Vending &amp; Entertainment Equipment</h1>
     <p style="${LEAD}">${products.length} vending, entertainment and self-service equipment lines for OEM / ODM buyers, from popcorn machines to VR rides.</p>
@@ -252,23 +257,23 @@ const PRERENDER = {
     ${contactHtml}
   </div>`,
 
-  '/about': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
+  '/about/': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
     ${navHtml}
     <h1 style="${H1}">About Ruiying — Vending Equipment Supplier &amp; OEM Partner</h1>
     <p style="${LEAD}">Guangzhou Ruiying Electronic Equipment supplies smart vending machines, entertainment equipment and self-service solutions to overseas distributors, operators and brand owners.</p>
     <p style="${P}">We work as an engineering and sourcing partner rather than a pure reseller: equipment is specified for the destination market, adapted for local payment and power standards, and documented for import clearance. Ruiying covers ${products.length} equipment lines across vending, food and treat equipment and commercial entertainment.</p>
     <p style="${P}">Typical cooperation models are OEM (your branding, your packaging, your firmware language) and ODM (our proven platform adapted to your market). Volume programmes are supported with spare parts planning, remote monitoring and after-sales documentation.</p>
-    <p style="${P}"><a href="/products">Browse the equipment catalogue</a> or <a href="/contact">send a project inquiry</a>.</p>
+    <p style="${P}"><a href="/products/">Browse the equipment catalogue</a> or <a href="/contact/">send a project inquiry</a>.</p>
     ${contactHtml}
   </div>`,
 
-  '/contact': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
+  '/contact/': `<div style="max-width:1100px;margin:0 auto;padding:28px 20px">
     ${navHtml}
     <h1 style="${H1}">Contact Ruiying — OEM / ODM Inquiry</h1>
     <p style="${LEAD}">Tell us what equipment you are looking for, your target market and project stage. Ruiying supports equipment sourcing and OEM / ODM cooperation for the United States, Europe, Mexico and the Middle East.</p>
     <p style="${P}">Write to us with the model or equipment type, the voltage and payment configuration required for your market, and your target quantity. We reply with the spec sheet, options list and an indicative quotation.</p>
     ${contactHtml}
-    <p style="${P}">See also: <a href="/products">equipment catalogue</a>, <a href="/about">about Ruiying</a>.</p>
+    <p style="${P}">See also: <a href="/products/">equipment catalogue</a>, <a href="/about/">about Ruiying</a>.</p>
   </div>`,
 };
 
@@ -294,13 +299,19 @@ if (domain) {
     if (r === '/') {
       fs.writeFileSync(baseFile, html, 'utf8');
     } else {
-      // 用平铺文件（dist/products.html）而不是目录（dist/products/index.html）：
-      // 目录形式会让 Netlify 把 /products 301 跳到 /products/，
-      // 与 canonical 里的 /products 不一致，又会被判成「替代版本」。
-      fs.writeFileSync(path.join(DIST, `${r.slice(1)}.html`), html, 'utf8');
+      // GitHub Pages 没有 Netlify 那种无扩展名改写，所以用目录形式：
+      // dist/products/index.html → 访问 /products/ ；/products 会被 301 到 /products/，
+      // canonical / sitemap 都写成带尾斜杠的形式，与最终网址一致。
+      const dir = path.join(DIST, r.slice(1));
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
     }
   }
   log(`✓ 已生成 ${routes.length} 个页面（各自独立 canonical / title / description）`);
+
+  // 自定义域名（GitHub Pages 读取发布目录里的 CNAME 文件）
+  fs.writeFileSync(path.join(DIST, 'CNAME'), `${domain}\n`, 'utf8');
+  log(`✓ 已写 CNAME: ${domain}`);
 
   const urls = routes
     .map((r) => `  <url><loc>https://${domain}${r}</loc><changefreq>monthly</changefreq></url>`)
