@@ -104,7 +104,7 @@ GitHub Pages 里自定义域是 `gzruiying.com`，`www.gzruiying.com` 会 301 �
 | canonical | **每个页面各自指向自己的网址**（`/` → `/`，`/products/` → `/products/` …） |
 | 页面正文 | **已预渲染进 HTML**，爬虫不用跑 JS 也能读到内容（见下节） |
 | 重复内容 | 无：每页独立 HTML + 自指 canonical |
-| Bing Webmaster | 已验证，sitemap 已提交，IndexNow 已推送 |
+| Bing Webmaster | 已验证，sitemap 已重新提交，4 个 URL 已请求索引，IndexNow 已推送；Live URL 测试通过（`URL can be indexed by Bing`，无 SEO 问题） |
 | Google Search Console | 待办：需能访问 Google 的网络环境后，按 DNS TXT 方式验证并提交 sitemap |
 
 ### 每个页面独立 HTML（务必不要改回单页一份）
@@ -195,7 +195,8 @@ Netlify 的免费套餐是「每月 300 credits」，而 **一次生产部署收
 而且免费额度用尽后不能靠升级以外的方式恢复。“改一次产品就烧一次额度” 对长期运营不可行。
 
 GitHub Pages 的部署是免费的、不限次数，仓库公开即免费用，代价是代码公开可见。
-Netlify 旧项目（`roaring-raindrop-8cc5f1`）现在只剩历史部署记录，域名已不指向它，建议尽早删除以释放那个 netlify 子域名。
+
+**Netlify 旧项目已于 2026-11-15 删除**：`roaring-raindrop-8cc5f1.netlify.app` 现在返回 404，团队账号下已无任何项目，`netlify.com` 与这个站彻底无关。
 
 ## 九、出问题怎么查
 
@@ -219,5 +220,6 @@ Netlify 旧项目（`roaring-raindrop-8cc5f1`）现在只剩历史部署记录�
 1. 仓库里仍留着 20 张原始 PNG/JPEG（约 39 MB），访客不再下载，只占仓库体积。等网络方便时删掉。
 2. Google Search Console 未做（需要能访问 Google 的网络）。
 3. 首页 / About 文案仍在页面基线里，后台改不了；要做成可编辑需要再改一次基线。
-4. 产品页有 6 张图没写 alt 文字（Bing 已在 Live URL 里点名）；页面里还残留几处中文（如「获取参数」「图片浏览」）未英文化。
+4. 产品页有 6 张图在 React 渲染里没写 alt 文字（预渲染那段带了 alt，Bing 11/15 复查已不再报这一项）；页面里还残留几处中文（如「获取参数」「图片浏览」）未英文化。
 5. 没有产品独立详情页：点产品卡片不会跳转，只有「获取参数」跳到联系页并预填产品名。要做自己的产品页需要另外生成静态页面。
+6. PR30 的 30 张压好的 webp 还没上传到后台（单张最大 170 KB，符合 1 MB 上限）。
