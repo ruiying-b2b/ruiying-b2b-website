@@ -32,7 +32,7 @@ site/                    站点基线（页面设计、CSS、图片），一般�
   assets/index-*.css     样式
   assets/images/         所有图片（含 logo、产品图 webp）
 build.mjs                构建脚本：注入数据、生成 4 个页面各自的 canonical / title、预渲染正文、sitemap、IndexNow
-serve.py                 本地预览服务器（模拟无扩展名 / 尾斜杠自动找 index.html）
+serve.py                 本地预览服务器（模拟目录形式 / 尾斜杠自动找 index.html）
 .github/workflows/pages.yml   GitHub Actions：构建 + 发布到 Pages
 .pages.yml               后台表单定义（字段、分类选项、图片上传位置）
 package.json             scripts.build = node build.mjs
@@ -93,8 +93,7 @@ GitHub Pages 里自定义域是 `gzruiying.com`，`www.gzruiying.com` 会 301 �
 
 **上传新图前先压缩**，否则 `/products/` 会重新变慢，而且 PagesCMS 单个文件超过约 1 MB 会直接报 `Failed to upload file: 413`。目标：单张 ≤ 150 KB。
 
-原始高分辨率图备份在本地：
-`C:\Users\quinn\Doubao\chats\2026-11-14\new-chat-2\原图备份\`
+原始高分辨率原图备份在你自己的电脑上，不进仓库（仓库里只放压缩后的 webp）。
 
 ## 六、SEO 现状
 
@@ -176,7 +175,7 @@ curl.exe -s -X POST "https://api.indexnow.org/indexnow" -H "Content-Type: applic
 ## 七、本地预览
 
 ```powershell
-Set-Location "C:\Users\quinn\Doubao\chats\2026-11-14\new-chat-2\ruiying-cms"
+Set-Location "项目所在目录（含 build.mjs 的 ruiying-cms 文件夹）"
 $env:SKIP_INDEXNOW='1'; node build.mjs
 python serve.py 8089 (Join-Path (Get-Location) "dist")   # 打开 http://127.0.0.1:8089/products/
 ```
@@ -196,7 +195,7 @@ Netlify 的免费套餐是「每月 300 credits」，而 **一次生产部署收
 而且免费额度用尽后不能靠升级以外的方式恢复。“改一次产品就烧一次额度” 对长期运营不可行。
 
 GitHub Pages 的部署是免费的、不限次数，仓库公开即免费用，代价是代码公开可见。
-Netlify 旧项目（`roaring-raindrop-8cc5f1`）现在只剩历史部署记录，域名已不指向它，当备份就行。
+Netlify 旧项目（`roaring-raindrop-8cc5f1`）现在只剩历史部署记录，域名已不指向它，建议尽早删除以释放那个 netlify 子域名。
 
 ## 九、出问题怎么查
 
