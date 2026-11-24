@@ -11,7 +11,7 @@
 你在后台改 content/products.json
         ↓ 自动 commit 到 GitHub main
 GitHub Actions（.github/workflows/pages.yml）被触发，执行 npm run build（= node build.mjs）
-        ↓ 注入产品数据、给 4 个页面各写独立 canonical / title、预渲染正文、生成 sitemap、推 IndexNow
+        ↓ 注入产品数据、给每个产品生成独立详情页（4 → 21 个页面）、预渲染正文、生成 sitemap、推 IndexNow
 产物 dist/ 直接发布为 GitHub Pages，约 1–2 分钟上线
 ```
 
@@ -31,7 +31,7 @@ site/                    站点基线（页面设计、CSS、图片），一般�
   assets/index-*.js      页面与布局（编译产物）
   assets/index-*.css     样式
   assets/images/         所有图片（含 logo、产品图 webp）
-build.mjs                构建脚本：注入数据、生成 4 个页面各自的 canonical / title、预渲染正文、sitemap、IndexNow
+build.mjs                构建脚本：注入数据、生成 4 个主页面 + 17 个产品详情页、预渲染正文、sitemap、IndexNow
 serve.py                 本地预览服务器（模拟目录形式 / 尾斜杠自动找 index.html）
 .github/workflows/pages.yml   GitHub Actions：构建 + 发布到 Pages
 .pages.yml               后台表单定义（字段、分类选项、图片上传位置）
@@ -75,13 +75,15 @@ GitHub Pages 里自定义域是 `gzruiying.com`，`www.gzruiying.com` 会 301 �
 | 型号行 model | 形如 `SMART VENDING / RV-03` |
 | 分类 category | 只能三选一：`Smart Vending` / `Food & Treat Equipment` / `Commercial Entertainment`，填错这个产品在筛选里消失 |
 | 主图 image | 从「产品图片」媒体库选，或现场上传 |
-| 卖点描述 copy | 英文，2 句以内，参数别写这里 |
-| 参数要点 specs | 每行一条，建议 2 条，最多 3 条 |
+| 卖点描述 copy | 英文，2 句以内，参数别写这里；以 `●` 开头的行会排成 Features 列表 |
+| 参数要点 specs | 每行一条，建议 2 条，最多 3 条，用 `名称: 值` 的格式 |
 | 图集 gallery | 选填，最多 8 张 |
 
 保存后自动提交 → Actions 自动构建 → **1–2 分钟左右官网更新**（刷新时若没变，等 1 分钟或按 Ctrl+F5）。
 
 排序按 `id` 从小到大，想让某个产品靠前就把 id 调小（但不能与别的重复）。
+
+新增一条产品会自动多出一个详情页（网址按「产品名 + 型号」生成），sitemap 和 IndexNow 也会自动带上它，**不需要改代码**。
 
 「联系方式」页可改：`email`、`phoneDisplay`、`whatsappNumber`（纯数字含国家码）、`domain`。
 
@@ -99,13 +101,45 @@ GitHub Pages 里自定义域是 `gzruiying.com`，`www.gzruiying.com` 会 301 �
 
 | 项目 | 状态 |
 |---|---|
-| `https://gzruiying.com/sitemap.xml` | 4 条 URL，带尾斜杠：`/`、`/products/`、`/about/`、`/contact/` |
+| `https://gzruiying.com/sitemap.xml` | 21 条 URL：4 个主页面（`/`、`/products/`、`/about/`、`/contact/`）+ 17 个产品详情页，全部带尾斜杠，带 `lastmod` |
 | `https://gzruiying.com/robots.txt` | 有，含 `Sitemap:` 指路 |
-| canonical | **每个页面各自指向自己的网址**（`/` → `/`，`/products/` → `/products/` …） |
+| canonical | **每个页面各自指向自己的网址**（`/` → `/`，`/products/` → `/products/`，每个详情页 → 自身） |
 | 页面正文 | **已预渲染进 HTML**，爬虫不用跑 JS 也能读到内容（见下节） |
 | 重复内容 | 无：每页独立 HTML + 自指 canonical |
-| Bing Webmaster | 已验证，sitemap 已重新提交，4 个 URL 已请求索引，IndexNow 已推送；Live URL 测试通过（`URL can be indexed by Bing`，无 SEO 问题） |
+| 产品图 alt | 已补齐（React 渲染与静态 HTML 都带「产品名 + 型号」） |
+| Bing Webmaster | 已验证，sitemap 21 条；IndexNow 每次构建自动推 21 条；11/15 曾为 4 个主页面请求索引（配额余 96） |
 | Google Search Console | 待办：需能访问 Google 的网络环境后，按 DNS TXT 方式验证并提交 sitemap |
+
+### 产品详情页：每个型号一页（4 → 21 个页面）
+
+原来 17 个产品全挤在 `/products/` 一个页面上，搜索引擎只有 4 个入口，长尾词（如
+`popcorn vending machine PR30`）没有落点。现在 `build.mjs` 第 7c 段给每个产品生成一页
+完全静态的详情页（无 React、无 JS，抓到什么显示什么）：
+
+```
+/products/popcorn-vending-machine-pr30/
+/products/smart-coffee-vending-machine-cfm-r02/
+/products/vr-space-wheel/
+...
+```
+
+- 网址规则：`产品名` + `型号短码` 转小写短横线；同名不同型号（PR30 / PR31）靠型号区分。
+  型号和产品名完全一样时（VR Space Wheel）只取一次。
+- 每页自带：`title`、`description`（控制在 100–150 字符）、自指 canonical、
+  `og:type=product`、Product + BreadcrumbList 两段 JSON-LD、规格表、卖点、
+  产品图集、同类型号内链、`/contact/?product=...` 询盘入口。
+- `/products/` 上的产品卡片，按钮已从「跳到联系页」改成「跳到该型号的详情页」，
+  保证 17 个详情页都拿到内链。
+- 新增产品**不需要改代码**：在 PagesCMS 加一条产品，构建时就多一页、sitemap 多一条。
+- 页面样式类名统一带 `pd-` 前缀，避免和主站样式表里的 `.hero` / `.page` 撞车。
+- 图集文件名里的中文（`微信图片_....webp`）会在构建时改名为 `<slug>-gallery-N.webp`，
+  只在 `dist/` 里改，仓库原图不动，PagesCMS 也不用管。
+
+### logo 白块：没有换图，用样式解决
+
+`site/assets/images/logo-ruiying.jpg` 是 1024×1024 的白底方图，白边上下各约 20%，直接放进深色导航会显出一个白方块。
+`build.mjs` 在生成的 HTML 里注入一小段样式：白底翻成黑再 `screen` 混合成透明，深色 logo 反成浅色，
+放大 1.45 倍把白边挤出容器（`.brand-logo` 本身有 `overflow:hidden`）。导航和页脚同时生效，没有改图片文件。
 
 ### 每个页面独立 HTML（务必不要改回单页一份）
 
@@ -136,15 +170,16 @@ GitHub Pages 里自定义域是 `gzruiying.com`，`www.gzruiying.com` 会 301 �
 状态停在 `Discovered but not crawled`，也就是「知道有这个网址，但不值得来抓」。
 
 `build.mjs` 第 7b 段因此把每个路由的正文以静态 HTML 写进 `#root`：h1 标题、公司介绍、
-全部产品的名称 / 型号 / 分类 / 卖点 / 参数、指向 `/contact/?product=...` 的内链、联系方式。
+全部产品的名称 / 型号 / 分类 / 卖点 / 参数 / 主图、指向产品详情页和 `/contact/?product=...` 的内链、联系方式。
 React 挂载后会整体替换掉这段静态内容，用户看到的画面完全不变。
 
 | 页面 | 改动前 | 改动后 |
 |---|---|---|
-| `/` | 806 字节，空 div | 约 16.8 KB |
-| `/products/` | 838 字节，空 div | 约 16.6 KB |
-| `/about/` | 844 字节，空 div | 约 2.9 KB |
-| `/contact/` | 797 字节，空 div | 约 2.5 KB |
+| `/` | 806 字节，空 div | 约 28 KB |
+| `/products/` | 838 字节，空 div | 约 28 KB |
+| `/about/` | 844 字节，空 div | 约 3.1 KB |
+| `/contact/` | 797 字节，空 div | 约 2.6 KB |
+| 每个产品详情页 | 无此页 | 约 11 KB |
 
 改文案的位置：`build.mjs` 里的 `PRERENDER` 对象（按路由分四段）。产品列表是从
 `content/products.json` 自动生成的，**改产品不需要动这里**；只有改标题、介绍段落才需要动。
@@ -158,7 +193,7 @@ React 挂载后会整体替换掉这段静态内容，用户看到的画面完�
 
 ### IndexNow 自动推送
 
-`build.mjs` 第 9 段：每次构建成功后，自动把 4 个 URL 推给 `api.indexnow.org`（Bing / Yandex / Naver / Seznam 共用这套协议）。**推送失败只打警告，绝不会让部署失败**。
+`build.mjs` 第 9 段：每次构建成功后，自动把 21 个 URL 推给 `api.indexnow.org`（Bing / Yandex / Naver / Seznam 共用这套协议）。**推送失败只打警告，绝不会让部署失败**。
 
 手动推送（改了内容但想立刻通知时）：
 
@@ -206,13 +241,14 @@ GitHub Pages 的部署是免费的、不限次数，仓库公开即免费用，�
 | Actions 构建失败 | 点开失败的运行看 `Build site` 步骤日志，中文报错例如「产品 id=xx 缺少必填字段「copy」」，按提示补 |
 | 打开网页报「您的连接不是私密连接」 | GitHub 还没为域名签好证书，在 Pages 设置里看 `Enforce HTTPS` 是否可用；DNS 刚改时常见，等几十分钟 |
 | 打开某个页面 404 | 路由没按目录形式生成（应为 `dist/products/index.html`），检查 `build.mjs` 的 routes 是否带尾斜杠 |
+| 产品详情页 404 | 检查 `dist/products/<slug>/index.html` 是否生成；slug 由构建脚本按「产品名 + 型号」算，页面里能直接看到实际网址 |
 | 产品图裂了 | `image` 必须是 `/assets/images/products/xxx.webp` 形式，且文件真在 `site/assets/images/products/` 下 |
 | 后台看不到「产品」菜单 / 传图报 No media configuration | `.pages.yml` 被改坏或没推上去，回到数组形式的 `media` 配置 |
 | 传图报 `Failed to upload file: 413` | 单个文件超过约 1 MB，先压成 WebP（长边 1400、质量 82）再传 |
 | 邮件收不到 | 检查阿里云 MX 三条是否还在、`@` 是否被错加了 CNAME |
 | 访问 `www.gzruiying.com` 跳回主域 | 正常，这是 GitHub Pages 的默认行为，保证一个 canonical 主机 |
 | Bing 报 `page is an alternate version`，canonical 指向首页 | 各页面 HTML 没生成，检查 `dist/products/index.html` 等 4 个文件是否存在 |
-| Bing 报 `H1 tag missing` 或页面停在 `Discovered but not crawled` | 预渲染段没生效，检查线上 HTML 大小是否只有几百字节（正常应 2–17 KB） |
+| Bing 报 `H1 tag missing` 或页面停在 `Discovered but not crawled` | 预渲染段没生效，检查线上 HTML 大小是否只有几百字节（正常应 2–28 KB） |
 | 本机 `git push` 失败（Connection reset） | 本机到 github.com:443 被墙，走 Actions/后台（服务器侧通信）不受影响；要同步本地副本需网络环境支持 |
 
 ## 十、本该做但没做的
@@ -220,6 +256,6 @@ GitHub Pages 的部署是免费的、不限次数，仓库公开即免费用，�
 1. 仓库里仍留着 20 张原始 PNG/JPEG（约 39 MB），访客不再下载，只占仓库体积。等网络方便时删掉。
 2. Google Search Console 未做（需要能访问 Google 的网络）。
 3. 首页 / About 文案仍在页面基线里，后台改不了；要做成可编辑需要再改一次基线。
-4. 产品页有 6 张图在 React 渲染里没写 alt 文字（预渲染那段带了 alt，Bing 11/15 复查已不再报这一项）；页面里还残留几处中文（如「获取参数」「图片浏览」）未英文化。
-5. 没有产品独立详情页：点产品卡片不会跳转，只有「获取参数」跳到联系页并预填产品名。要做自己的产品页需要另外生成静态页面。
-6. PR30 的 30 张压好的 webp 还没上传到后台（单张最大 170 KB，符合 1 MB 上限）。
+4. PR30 的 30 张压好的 webp 还没上传到后台（单张最大 170 KB，符合 1 MB 上限）。
+
+> 已做完、从这里移走的：产品图 alt（React 与静态 HTML 均带「产品名 + 型号」）、页面中文残留（「获取参数」「图片浏览」「图片 N」「设备示意图」「这条路径还没有内容。」「返回首页」均已英文化）、logo 白块（用样式解决，未换图）、产品独立详情页（4 → 21 页）。
